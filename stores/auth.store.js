@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -7,13 +7,17 @@ export const useAuthStore = create((set) => ({
   isAuthenticated: false,
   loading: false,
   error: null,
+  hydrating: true,
 
   setUser: (user) => set({
     user,
     rol: user?.rol || null,
     isAuthenticated: !!user,
     loading: false,
+    error: null,
   }),
+
+  setHydrated: () => set({ hydrating: false }),
 
   loginCredentials: async (email, password) => {
     set({ loading: true, error: null });
@@ -56,7 +60,6 @@ export const useAuthStore = create((set) => ({
         set({ error: data.error || 'Error al registrar', loading: false });
         return false;
       }
-      // Auto-login after registration
       const loginResult = await signIn('credentials', {
         email,
         password,

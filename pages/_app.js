@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/auth.store';
 
 function AuthHydrator({ children }) {
   const { data: session, status } = useSession();
-  const { setUser } = useAuthStore();
+  const { setUser, setHydrated } = useAuthStore();
 
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
@@ -14,7 +14,10 @@ function AuthHydrator({ children }) {
     } else if (status === 'unauthenticated') {
       setUser(null);
     }
-  }, [session, status, setUser]);
+    if (status !== 'loading') {
+      setHydrated();
+    }
+  }, [session, status, setUser, setHydrated]);
 
   return children;
 }
