@@ -4,7 +4,9 @@ const searchableFields = ['nombre', 'categoria'];
 
 const mapRecord = (record) => {
   const stock = record.stock ?? 0;
-  const min = 0;
+  const precio = parseFloat(record.precio) || 0;
+  const precio_compra = parseFloat(record.precio_compra) || 0;
+  const min = record.stock_minimo ?? 5;
   let estado;
   if (stock === 0) {
     estado = 'Sin Stock';
@@ -17,12 +19,16 @@ const mapRecord = (record) => {
   return {
     id: record.id,
     nombre: record.nombre || '',
+    descripcion: record.descripcion || '',
     categoria: record.categoria || '',
     stock,
     min,
-    precio: record.precio ?? 0,
-    unidad: 'unidad',
+    precio,
+    precio_compra,
+    unidad: record.unidad || 'unidad',
     estado,
+    icono: record.icono || '📦',
+    imagen: record.imagen || null,
   };
 };
 

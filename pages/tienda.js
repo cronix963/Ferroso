@@ -45,17 +45,9 @@ export default function Tienda() {
   }, [user]);
 
   useEffect(() => {
-    if (!hydrating && (!isAuthenticated || rol !== 'cliente')) {
-      router.replace('/');
-    }
-  }, [hydrating, isAuthenticated, rol, router]);
-
-  useEffect(() => {
-    if (!hydrating && isAuthenticated) {
-      const saved = localStorage.getItem('ferrotech_cliente_nombre');
-      if (saved) setForm(f => ({...f, nombre: saved}));
-    }
-  }, [hydrating, isAuthenticated]);
+    if (!hydrating && isAuthenticated && user?.nombre) setUserName(user.nombre);
+    else if (!hydrating && isAuthenticated && user?.email) setUserName(user.email);
+  }, [hydrating, isAuthenticated, user]);
 
   if (hydrating) {
     return (
@@ -64,8 +56,6 @@ export default function Tienda() {
       </div>
     );
   }
-
-  if (!isAuthenticated || rol !== 'cliente') return null;
 
   const filtered = products.filter(p => {
     const mc = cat === 'Todas' || p.cat === cat;
@@ -77,6 +67,7 @@ export default function Tienda() {
   const setQty = (id, v) => setQuantities(prev => ({...prev, [id]: Math.max(1, Math.min(v, products.find(p => p.id === id)?.stock || 99))}));
 
   const addToCart = (p) => {
+    if (!isAuthenticated) { router.push('/'); return; }
     const q = getQty(p.id);
     setCart(prev => {
       const ex = prev.find(i => i.id === p.id);
@@ -100,6 +91,10 @@ export default function Tienda() {
   const cartTotal = cart.reduce((s, i) => s + i.qty * i.price, 0);
 
   const handleCheckout = async () => {
+    if (!isAuthenticated) {
+      router.push('/');
+      return;
+    }
     const orderCode = '#P-' + Date.now().toString(36).toUpperCase();
     setSubmitting(true);
     try {
@@ -164,7 +159,7 @@ export default function Tienda() {
               <span className="text-[0.6rem] text-white/40 block max-sm:hidden">Cliente</span>
             </div>
           </div>
-          <button className="relative bg-white/10 border-0 text-white w-9 h-9 rounded-lg cursor-pointer flex items-center justify-center text-lg transition-all duration-200 hover:bg-white/20" onClick={() => setCartOpen(true)}>
+          <button className="relative bg-white/10 border-0 text-white w-9 h-9 rounded-lg cursor-pointer flex items-center justify-center text-lg transition-all duration-200 hover:bg-white/20" onClick={() => { if (!isAuthenticated) { router.push('/'); return; } setCartOpen(true); }}>
             <FiShoppingCart />
             {cartCount > 0 && <span className="absolute -top-1.5 -right-1.5 bg-accent text-white w-5 h-5 rounded-full text-[0.6rem] font-bold flex items-center justify-center">{cartCount}</span>}
           </button>

@@ -41,7 +41,7 @@ export const useAuthStore = create((set) => ({
   loginGoogle: async () => {
     set({ loading: true, error: null });
     try {
-      await signIn('google', { callbackUrl: '/dashboard' });
+      await signIn('google', { callbackUrl: '/cliente' });
     } catch {
       set({ error: 'Error con Google', loading: false });
     }
