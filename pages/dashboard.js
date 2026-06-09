@@ -57,9 +57,9 @@ export default function Dashboard() {
         .then((res) => res.json())
         .then((json) => {
           setStats({
-            usuarios: json.data.usuarios,
-            productos: json.data.productos,
-            clientes: json.data.clientes,
+            usuarios: json.usuarios,
+            productos: json.productos,
+            clientes: json.clientes,
           });
           setStatsLoading(false);
         })

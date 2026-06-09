@@ -10,10 +10,10 @@ export default async function handler(req, res) {
     }
     if (req.method === 'PUT') {
       const { nombre, contacto, email, telefono, direccion, ciudad, notas, activo } = req.body;
-      const result = await query('UPDATE proveedores SET nombre=$1, contacto=$2, email=$3, telefono=$4, direccion=$5, ciudad=$6, notas=$7, activo=$8 WHERE id=$9 RETURNING id',
+      const result = await query('UPDATE proveedores SET nombre=$1, contacto=$2, email=$3, telefono=$4, direccion=$5, ciudad=$6, notas=$7, activo=$8 WHERE id=$9 RETURNING *',
         [nombre, contacto, email, telefono, direccion, ciudad, notas, activo !== undefined ? activo : true, id]);
       if (result.rows.length === 0) return res.status(404).json({ error: 'Proveedor no encontrado' });
-      return res.status(200).json({ message: 'Proveedor actualizado' });
+      return res.status(200).json({ data: result.rows[0] });
     }
     if (req.method === 'DELETE') {
       await query('UPDATE proveedores SET activo = FALSE WHERE id = $1', [id]);

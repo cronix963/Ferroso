@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const result = await query('SELECT * FROM pedidos ORDER BY created_at DESC');
-      return res.status(200).json({ items: result.rows, total: result.rows.length });
+      return res.status(200).json({ data: result.rows, total: result.rows.length });
     }
     if (req.method === 'POST') {
       const { cliente, email, telefono, direccion, items, total, subtotal, impuesto, tipo, metodo_pago, notas, estado, pago } = req.body;
@@ -14,10 +14,10 @@ export default async function handler(req, res) {
       const imp = impuesto || 0;
       const tot = total || sub + imp;
       const result = await query(
-        `INSERT INTO pedidos (codigo, cliente, email, telefono, direccion, items, subtotal, impuesto, total, tipo, metodo_pago, notas, estado, pago) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING id, codigo`,
+        `INSERT INTO pedidos (codigo, cliente, email, telefono, direccion, items, subtotal, impuesto, total, tipo, metodo_pago, notas, estado, pago) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
         [codigo, cliente, email||null, telefono||null, direccion||null, JSON.stringify(items||[]), sub, imp, tot, tipo||'tienda', metodo_pago||'Efectivo', notas||null, estado||'Pendiente', pago||'Pendiente']
       );
-      return res.status(201).json({ message: 'Pedido creado', id: result.rows[0].id, codigo: result.rows[0].codigo });
+      return res.status(201).json({ data: result.rows[0] });
     }
     return res.status(405).json({ error: 'Método no permitido' });
   } catch (err) {

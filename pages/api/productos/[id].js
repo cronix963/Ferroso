@@ -11,11 +11,11 @@ export default async function handler(req, res) {
     if (req.method === 'PUT') {
       const { nombre, descripcion, categoria_id, categoria, precio, precio_compra, stock, stock_minimo, unidad, codigo_barras, codigo_interno, proveedor_id, icono, imagen, activo } = req.body;
       const result = await query(
-        `UPDATE productos SET nombre=$1, descripcion=$2, categoria_id=$3, categoria=$4, precio=$5, precio_compra=$6, stock=$7, stock_minimo=$8, unidad=$9, codigo_barras=$10, codigo_interno=$11, proveedor_id=$12, icono=$13, imagen=$14, activo=$15, updated_at=NOW() WHERE id=$16 RETURNING id`,
+        `UPDATE productos SET nombre=$1, descripcion=$2, categoria_id=$3, categoria=$4, precio=$5, precio_compra=$6, stock=$7, stock_minimo=$8, unidad=$9, codigo_barras=$10, codigo_interno=$11, proveedor_id=$12, icono=$13, imagen=$14, activo=$15, updated_at=NOW() WHERE id=$16 RETURNING *`,
         [nombre, descripcion||null, categoria_id||null, categoria||null, precio, precio_compra||0, stock||0, stock_minimo||5, unidad||'unidad', codigo_barras||null, codigo_interno||null, proveedor_id||null, icono||'📦', imagen||null, activo !== undefined ? activo : true, id]
       );
       if (result.rows.length === 0) return res.status(404).json({ error: 'Producto no encontrado' });
-      return res.status(200).json({ message: 'Producto actualizado', id: result.rows[0].id });
+      return res.status(200).json({ data: result.rows[0] });
     }
     if (req.method === 'DELETE') {
       await query('UPDATE productos SET activo = FALSE, updated_at = NOW() WHERE id = $1', [id]);
