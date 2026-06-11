@@ -366,7 +366,7 @@ export default function Vendedor() {
       <header className="bg-primary px-6 py-2.5 flex items-center justify-between text-white sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <div className="font-bold text-base flex items-center gap-2">
-            <img src="/images/productos/ferrotech_logo.svg" alt="FERROTECH" className="h-8 w-auto" />
+            <img src="/images/ferrotech_logo.svg" alt="FERROTECH" className="h-8 w-auto" />
           </div>
         </div>
         <div className="flex gap-5 max-sm:hidden">

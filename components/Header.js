@@ -30,7 +30,7 @@ export default function Header() {
   return (
     <header className="bg-primary px-4 py-2.5 flex items-center justify-between gap-3 sm:px-6 lg:px-8">
       <div className="flex items-center gap-2.5 shrink-0 cursor-pointer" onClick={() => router.push('/dashboard')}>
-        <img src="/images/productos/ferrotech_logo.svg" alt="FERROTECH" className="h-9 w-auto" />
+        <img src="/images/ferrotech_logo.svg" alt="FERROTECH" className="h-9 w-auto" />
       </div>
 
       <div ref={searchRef} className="hidden sm:block flex-1 max-w-[360px] relative">

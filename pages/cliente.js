@@ -89,7 +89,7 @@ export default function ClienteHome() {
           className="flex items-center gap-2.5 font-bold text-lg cursor-pointer"
           onClick={() => router.push('/cliente')}
         >
-          <img src="/images/productos/ferrotech_logo.svg" alt="FERROTECH" className="h-9 w-auto" />
+          <img src="/images/ferrotech_logo.svg" alt="FERROTECH" className="h-9 w-auto" />
         </div>
         <div className="flex items-center gap-4">
           <button
