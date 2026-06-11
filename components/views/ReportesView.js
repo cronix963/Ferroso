@@ -1,47 +1,72 @@
-import { useEffect, useState } from 'react';
-import { FiBarChart2, FiTrendingUp, FiUsers, FiDollarSign, FiPackage, FiShoppingCart } from 'react-icons/fi';
+import { useEffect, useRef, useState } from 'react';
+import {
+  FiBarChart2,
+  FiTrendingUp,
+  FiUsers,
+  FiDollarSign,
+  FiPackage,
+  FiShoppingCart,
+} from 'react-icons/fi';
 import { formatPrice } from '../../lib/price';
-
-const timeAgo = (iso) => {
-  if (!iso) return '';
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Ahora';
-  if (mins < 60) return `Hace ${mins} min`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `Hace ${hrs} h`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `Hace ${days} día${days > 1 ? 's' : ''}`;
-  return formatDate(iso);
-};
 
 const formatDate = (iso) => {
   if (!iso) return '';
-  try { return new Date(iso).toLocaleDateString('es-ES'); } catch { return ''; }
+  try {
+    return new Date(iso).toLocaleDateString('es-ES');
+  } catch {
+    return '';
+  }
+};
+
+const timeAgo = (iso) => {
+  if (!iso) return '';
+
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+
+  if (mins < 1) return 'Ahora';
+  if (mins < 60) return `Hace ${mins} min`;
+
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `Hace ${hrs} h`;
+
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `Hace ${days} día${days > 1 ? 's' : ''}`;
+
+  return formatDate(iso);
 };
 
 export default function ReportesView() {
   const [stats, setStats] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+
+  const reportRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
       try {
-        // Compute date range for "last 30 days"
-        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-
-        // Fetch counts and data in parallel
-        const [ventasRes, pedidosRes, clientesRes, productosRes, recentPedidos] = await Promise.all([
-          fetch('/api/ventas?limit=200&sort=-created_at').then(r => r.json()),
-          fetch('/api/pedidos?limit=1').then(r => r.json()),
-          fetch('/api/clientes?limit=1').then(r => r.json()),
-          fetch('/api/productos?limit=1').then(r => r.json()),
-          fetch('/api/pedidos?limit=8&sort=-created_at').then(r => r.json()),
+        const [
+          ventasRes,
+          pedidosRes,
+          clientesRes,
+          productosRes,
+          recentPedidos,
+        ] = await Promise.all([
+          fetch('/api/ventas?limit=200&sort=-created_at').then((r) => r.json()),
+          fetch('/api/pedidos?limit=1').then((r) => r.json()),
+          fetch('/api/clientes?limit=1').then((r) => r.json()),
+          fetch('/api/productos?limit=1').then((r) => r.json()),
+          fetch('/api/pedidos?limit=8&sort=-created_at').then((r) => r.json()),
         ]);
 
         const ventasMes = ventasRes.data || [];
-        const totalVentas = ventasMes.reduce((s, v) => s + (parseFloat(v.total) || 0), 0);
+        const totalVentas = ventasMes.reduce(
+          (s, v) => s + (parseFloat(v.total) || 0),
+          0,
+        );
+
         const pedidosCount = pedidosRes.total || 0;
         const clientesCount = clientesRes.total || 0;
         const productosCount = productosRes.total || 0;
@@ -88,12 +113,16 @@ export default function ReportesView() {
           },
         ]);
 
-        // Build recent activity from recent pedidos
         const activity = (recentPedidos.data || []).map((p) => ({
-          action: `Nuevo pedido ${p.codigo || String(p.id).slice(0, 8).toUpperCase()}`,
-          detail: `${p.cliente || '—'} — ${formatPrice(parseFloat(p.total) || 0)}`,
+          action: `Nuevo pedido ${
+            p.codigo || String(p.id).slice(0, 8).toUpperCase()
+          }`,
+          detail: `${p.cliente || '—'} — ${formatPrice(
+            parseFloat(p.total) || 0,
+          )}`,
           time: timeAgo(p.created_at),
         }));
+
         setRecentActivity(activity);
       } catch (err) {
         console.error('Failed to load reports:', err);
@@ -101,8 +130,56 @@ export default function ReportesView() {
         setLoading(false);
       }
     };
+
     load();
   }, []);
+
+  const handleGenerateReport = async () => {
+    if (!reportRef.current || generatingPdf) return;
+
+    try {
+      setGeneratingPdf(true);
+
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const canvas = await html2canvas(reportRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const usableWidth = pdfWidth - margin * 2;
+      const imgHeight = (canvas.height * usableWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = margin;
+
+      pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight);
+      heightLeft -= pdfHeight - margin * 2;
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        position = heightLeft - imgHeight + margin;
+        pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight);
+        heightLeft -= pdfHeight - margin * 2;
+      }
+
+      const fileDate = new Date().toISOString().slice(0, 10);
+      pdf.save(`reporte-ferrotech-${fileDate}.pdf`);
+    } catch (err) {
+      console.error('Error al generar el reporte PDF:', err);
+      alert('No se pudo generar el PDF del reporte.');
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -113,9 +190,15 @@ export default function ReportesView() {
   }
 
   return (
-    <div className="module-view">
+    <div className="module-view" ref={reportRef}>
       <div className="flex justify-between items-center flex-wrap gap-2">
-        <h2 className="text-xl text-primary flex items-center gap-2">📊 Reportes y Dashboard <span className="text-[0.65rem] font-normal text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">Sebastian</span></h2>
+        <h2 className="text-xl text-primary flex items-center gap-2">
+          📊 Reportes y Dashboard{' '}
+          <span className="text-[0.65rem] font-normal text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">
+            Sebastian
+          </span>
+        </h2>
+
         <div className="flex gap-2">
           <select className="px-3 py-1.5 border border-gray-200 rounded-md text-xs bg-white text-gray-700 outline-none">
             <option>Últimos 30 días</option>
@@ -123,49 +206,93 @@ export default function ReportesView() {
             <option>Este trimestre</option>
             <option>Este año</option>
           </select>
-          <button className="inline-flex items-center gap-1 px-4 py-2 bg-primary text-white border-0 rounded-md text-xs font-semibold cursor-pointer whitespace-nowrap transition-all duration-200 hover:brightness-110"><FiBarChart2 size={14} /> Generar Reporte</button>
+
+          <button
+            type="button"
+            onClick={handleGenerateReport}
+            disabled={generatingPdf}
+            className="inline-flex items-center gap-1 px-4 py-2 bg-primary text-white border-0 rounded-md text-xs font-semibold cursor-pointer whitespace-nowrap transition-all duration-200 hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            <FiBarChart2 size={14} />
+            {generatingPdf ? 'Generando...' : 'Generar Reporte'}
+          </button>
         </div>
       </div>
-      <p className="text-xs text-gray-500 mb-4">Indicadores clave y actividad reciente del sistema</p>
+
+      <p className="text-xs text-gray-500 mb-4">
+        Indicadores clave y actividad reciente del sistema
+      </p>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3 mb-5">
-        {stats.map((s,i) => (
+        {stats.map((s, i) => (
           <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex justify-between items-start mb-2">
-              <span className="text-[0.68rem] text-gray-500 font-medium">{s.label}</span>
-              <s.icon style={{color:s.color,fontSize:'1.1rem'}} />
+              <span className="text-[0.68rem] text-gray-500 font-medium">
+                {s.label}
+              </span>
+              <s.icon style={{ color: s.color, fontSize: '1.1rem' }} />
             </div>
+
             <div className="text-xl font-bold text-gray-800">{s.value}</div>
-            <div className={`text-[0.68rem] font-semibold mt-0.5 ${s.change.startsWith('+') ? 'text-success' : 'text-danger'}`}>{s.change} vs mes anterior</div>
+
+            <div
+              className={`text-[0.68rem] font-semibold mt-0.5 ${
+                s.change.startsWith('+') ? 'text-success' : 'text-danger'
+              }`}
+            >
+              {s.change} vs mes anterior
+            </div>
           </div>
         ))}
       </div>
 
       {/* Activity Table */}
       <h4 className="text-xs text-primary mb-2.5">Actividad Reciente</h4>
+
       <table className="w-full border-collapse bg-white rounded-lg overflow-hidden border border-gray-200">
         <thead className="bg-primary">
           <tr>
-            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">ACCIÓN</th>
-            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">DETALLE</th>
-            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">TIEMPO</th>
+            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">
+              ACCIÓN
+            </th>
+            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">
+              DETALLE
+            </th>
+            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">
+              TIEMPO
+            </th>
           </tr>
         </thead>
+
         <tbody>
           {recentActivity.length === 0 ? (
             <tr className="border-b border-gray-100">
-              <td colSpan={3} className="px-7 py-7 text-center text-gray-400 text-xs">
+              <td
+                colSpan={3}
+                className="px-7 py-7 text-center text-gray-400 text-xs"
+              >
                 Sin actividad reciente
               </td>
             </tr>
-          ) : recentActivity.map((a,i) => (
-            <tr key={i} className="border-b border-gray-100 even:bg-gray-50 hover:bg-primary-100 transition-colors duration-100">
-              <td className="px-3 py-2 text-xs text-gray-700 font-medium">{a.action}</td>
-              <td className="px-3 py-2 text-xs text-gray-700">{a.detail}</td>
-              <td className="px-3 py-2 text-xs text-gray-400">{a.time}</td>
-            </tr>
-          ))}
+          ) : (
+            recentActivity.map((a, i) => (
+              <tr
+                key={i}
+                className="border-b border-gray-100 even:bg-gray-50 hover:bg-primary-100 transition-colors duration-100"
+              >
+                <td className="px-3 py-2 text-xs text-gray-700 font-medium">
+                  {a.action}
+                </td>
+                <td className="px-3 py-2 text-xs text-gray-700">
+                  {a.detail}
+                </td>
+                <td className="px-3 py-2 text-xs text-gray-400">
+                  {a.time}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
