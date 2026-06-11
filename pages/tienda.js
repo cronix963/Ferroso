@@ -31,6 +31,7 @@ export default function Tienda() {
       price: p.precio,
       stock: p.stock,
       icon: p.icono || '📦',
+      imagen: p.imagen || null,
       desc: p.descripcion || '',
     }));
   const categories = ['Todas', ...new Set(products.map((p) => p.cat))];
@@ -186,7 +187,14 @@ export default function Tienda() {
           <div className="col-span-full text-center py-16 text-gray-400">No se encontraron productos 😕</div>
         ) : filtered.map(p => (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden transition-all duration-200 flex flex-col hover:shadow-lg hover:-translate-y-0.5 hover:border-primary-100 cursor-pointer" key={p.id} onClick={() => setDetailProd(p)}>
-            <div className="h-[140px] bg-gray-50 flex items-center justify-center text-4xl border-b border-gray-100">{p.icon}</div>
+            <div className="h-[140px] bg-gray-50 flex items-center justify-center overflow-hidden border-b border-gray-100">
+              {p.imagen ? (
+                <img src={p.imagen} alt={p.name} className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-4xl">${p.icon}</span>`; }} />
+              ) : (
+                <span className="text-4xl">{p.icon}</span>
+              )}
+            </div>
             <div className="px-4 pb-4 pt-3.5 flex-1 flex flex-col">
               <span className="text-[0.6rem] uppercase tracking-wide text-primary-light font-semibold mb-0.5">{p.cat}</span>
               <h4 className="text-sm font-semibold text-gray-800 mb-1">{p.name}</h4>
@@ -239,7 +247,14 @@ export default function Tienda() {
             <div className="text-center py-10 text-gray-400 text-sm">El carrito está vacío</div>
           ) : cart.map(i => (
             <div className="flex gap-3 py-3 border-b border-gray-100" key={i.id}>
-              <div className="w-[50px] h-[50px] bg-gray-50 rounded-lg flex items-center justify-center shrink-0 text-xl">{i.icon}</div>
+              <div className="w-[50px] h-[50px] bg-gray-50 rounded-lg flex items-center justify-center shrink-0 overflow-hidden">
+                {i.imagen ? (
+                  <img src={i.imagen} alt={i.name} className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-xl">${i.icon}</span>`; }} />
+                ) : (
+                  <span className="text-xl">{i.icon}</span>
+                )}
+              </div>
               <div className="flex-1">
                 <h5 className="text-xs font-semibold text-gray-700">{i.name}</h5>
                 <div className="text-xs text-primary font-semibold">Bs{(i.price * i.qty).toFixed(2)}</div>
@@ -319,7 +334,14 @@ export default function Tienda() {
       {detailProd && (
         <div className="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-5" onClick={() => setDetailProd(null)}>
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl" onClick={e => e.stopPropagation()}>
-            <div className="text-5xl text-center mb-4">{detailProd.icon}</div>
+            <div className="w-full h-[180px] bg-gray-50 rounded-xl overflow-hidden mb-4 flex items-center justify-center">
+              {detailProd.imagen ? (
+                <img src={detailProd.imagen} alt={detailProd.name} className="w-full h-full object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-5xl">${detailProd.icon}</span>`; }} />
+              ) : (
+                <span className="text-5xl">{detailProd.icon}</span>
+              )}
+            </div>
             <h3 className="text-lg font-bold text-gray-800 text-center">{detailProd.name}</h3>
             <span className="text-[0.65rem] uppercase tracking-wide text-primary-light font-semibold block text-center mb-2">{detailProd.cat}</span>
             <div className="text-2xl font-bold text-primary text-center mb-3">Bs{detailProd.price.toFixed(2)}</div>

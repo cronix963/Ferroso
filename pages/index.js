@@ -30,6 +30,7 @@ export default function Home() {
       price: p.precio,
       stock: p.stock,
       icon: p.icono || '📦',
+      imagen: p.imagen || null,
       desc: p.descripcion || '',
     }));
 
@@ -221,7 +222,14 @@ export default function Home() {
                 className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer"
                 onClick={() => setDetailProd(p)}
               >
-                <div className="text-3xl mb-2">{p.icon}</div>
+                <div className="h-[100px] bg-gray-50 rounded-lg flex items-center justify-center overflow-hidden mb-2">
+                  {p.imagen ? (
+                    <img src={p.imagen} alt={p.name} className="w-full h-full object-cover"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-3xl">${p.icon}</span>`; }} />
+                  ) : (
+                    <span className="text-3xl">{p.icon}</span>
+                  )}
+                </div>
                 <h3 className="text-sm font-bold text-gray-800 mb-1 leading-tight">{p.name}</h3>
                 <p className="text-[0.65rem] text-gray-400 mb-2">{p.cat}</p>
                 <div className="text-primary font-bold text-base">Bs{p.price.toFixed(2)}</div>
@@ -295,10 +303,17 @@ export default function Home() {
       {detailProd && (
         <div className="fixed inset-0 bg-black/50 z-[300] flex items-center justify-center p-5" onClick={() => setDetailProd(null)}>
           <div className="bg-white rounded-2xl max-w-[400px] w-full p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-start mb-4">
-              <div className="text-4xl">{detailProd.icon}</div>
-              <button onClick={() => setDetailProd(null)} className="text-gray-400 hover:text-gray-600 cursor-pointer bg-none border-0"><FiX size={20} /></button>
-            </div>
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-[80px] h-[80px] bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center">
+                  {detailProd.imagen ? (
+                    <img src={detailProd.imagen} alt={detailProd.name} className="w-full h-full object-cover"
+                      onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-4xl">${detailProd.icon}</span>`; }} />
+                  ) : (
+                    <span className="text-4xl">{detailProd.icon}</span>
+                  )}
+                </div>
+                <button onClick={() => setDetailProd(null)} className="text-gray-400 hover:text-gray-600 cursor-pointer bg-none border-0"><FiX size={20} /></button>
+              </div>
             <h3 className="text-lg font-bold text-gray-800 mb-1">{detailProd.name}</h3>
             <p className="text-xs text-gray-400 mb-3">{detailProd.cat}</p>
             {detailProd.desc && <p className="text-sm text-gray-600 mb-4">{detailProd.desc}</p>}

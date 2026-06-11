@@ -82,6 +82,7 @@ const mapProduct = (r) => ({
   cat: r.categoria || '',
   price: parseFloat(r.precio) || 0,
   icon: r.icono || '📦',
+  imagen: r.imagen || null,
 });
 
 const badge = (s) =>
@@ -874,7 +875,14 @@ export default function Vendedor() {
                           inCart ? 'bg-primary-100 border-primary text-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-primary-light hover:bg-gray-50'
                         }`}
                       >
-                        <div className="text-lg mb-0.5">{p.icon}</div>
+                        <div className="w-full h-[60px] bg-gray-50 rounded overflow-hidden mb-1 flex items-center justify-center">
+                          {p.imagen ? (
+                            <img src={p.imagen} alt={p.name} className="w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-lg">${p.icon}</span>`; }} />
+                          ) : (
+                            <span className="text-lg">{p.icon}</span>
+                          )}
+                        </div>
                         <div className="font-semibold leading-tight">{p.name}</div>
                         <div className="text-[0.6rem] text-gray-400">{p.cat}</div>
                         <div className="text-primary font-bold mt-0.5">Bs{p.price.toFixed(2)}</div>
@@ -899,7 +907,14 @@ export default function Vendedor() {
                   <div className="space-y-1.5">
                     {newQuote.items.map((i) => (
                       <div key={i.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                        <span className="text-lg">{i.icon}</span>
+                        <div className="w-[36px] h-[36px] bg-gray-100 rounded overflow-hidden flex items-center justify-center shrink-0">
+                          {i.imagen ? (
+                            <img src={i.imagen} alt={i.name} className="w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-lg">${i.icon}</span>`; }} />
+                          ) : (
+                            <span className="text-lg">{i.icon}</span>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium text-gray-700 truncate">{i.name}</div>
                           <div className="text-[0.6rem] text-gray-400">Bs{i.price.toFixed(2)} c/u</div>
@@ -1120,7 +1135,14 @@ export default function Vendedor() {
                             : 'bg-white border-gray-200 text-gray-700 hover:border-primary-light hover:bg-gray-50'
                         }`}
                       >
-                        <div className="text-lg mb-0.5">{p.icon}</div>
+                        <div className="w-full h-[60px] bg-gray-50 rounded overflow-hidden mb-1 flex items-center justify-center">
+                          {p.imagen ? (
+                            <img src={p.imagen} alt={p.name} className="w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-lg">${p.icon}</span>`; }} />
+                          ) : (
+                            <span className="text-lg">{p.icon}</span>
+                          )}
+                        </div>
                         <div className="font-semibold leading-tight">{p.name}</div>
                         <div className="text-[0.6rem] text-gray-400">{p.cat}</div>
                         <div className="text-primary font-bold mt-0.5">Bs{p.price.toFixed(2)}</div>
@@ -1144,7 +1166,14 @@ export default function Vendedor() {
                   <div className="space-y-1.5">
                     {newSale.items.map((i) => (
                       <div key={i.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                        <span className="text-lg">{i.icon}</span>
+                        <div className="w-[36px] h-[36px] bg-gray-100 rounded overflow-hidden flex items-center justify-center shrink-0">
+                          {i.imagen ? (
+                            <img src={i.imagen} alt={i.name} className="w-full h-full object-cover"
+                              onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.innerHTML = `<span class="text-lg">${i.icon}</span>`; }} />
+                          ) : (
+                            <span className="text-lg">{i.icon}</span>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium text-gray-700 truncate">{i.name}</div>
                           <div className="text-[0.6rem] text-gray-400">Bs{i.price.toFixed(2)} c/u</div>
