@@ -170,6 +170,18 @@ export default function PagosCobrosView() {
               <span className="text-gray-600 text-sm font-medium">Concepto</span>
               <input type="text" placeholder="Ej: Pago de factura #001, Cobro mensual..." value={formData.concepto || ''} onChange={e => setFormData({...formData, concepto: e.target.value})} className="w-full border rounded px-3 py-2 text-sm mt-1" />
             </label>
+
+            {editing && (
+              <label className="block">
+                <span className="text-gray-600 text-sm font-medium">Estado</span>
+                <select value={formData.estado || 'Pendiente'} onChange={e => setFormData({...formData, estado: e.target.value})} className="w-full border rounded px-3 py-2 text-sm mt-1">
+                  <option value="Pendiente">⏳ Pendiente</option>
+                  <option value="Cobrado">💰 Cobrado</option>
+                  <option value="Pagado">✅ Pagado</option>
+                  <option value="Cancelado">❌ Cancelado</option>
+                </select>
+              </label>
+            )}
           </div>
         </FormModal>
       )}
