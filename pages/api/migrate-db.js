@@ -27,9 +27,18 @@ export default async function handler(req, res) {
 
     /* ─── Reset seed data to original state ─── */
     await query(`DELETE FROM ventas`);
-    await query(`DELETE FROM pedidos WHERE codigo LIKE '#P-171800%'`);
-    await query(`DELETE FROM compras WHERE codigo LIKE '#CO-171800%'`);
     await query(`DELETE FROM pagos_cobros`);
+    await query(`DELETE FROM compras WHERE codigo LIKE '#CO-171800%'`);
+    await query(`UPDATE pedidos SET estado = 'Pendiente', pago = 'Pendiente' WHERE codigo = '#P-1718000001'`);
+    await query(`UPDATE pedidos SET estado = 'En Proceso', pago = 'Pendiente' WHERE codigo = '#P-1718000002'`);
+    await query(`UPDATE pedidos SET estado = 'Completado', pago = 'Pagado' WHERE codigo = '#P-1718000003'`);
+    await query(`UPDATE pedidos SET estado = 'Despachado', pago = 'Pagado' WHERE codigo = '#P-1718000004'`);
+    await query(`UPDATE pedidos SET estado = 'Cancelado', pago = 'Pendiente' WHERE codigo = '#P-1718000005'`);
+    await query(`UPDATE pedidos SET estado = 'Preparación', pago = 'Pendiente' WHERE codigo = '#P-1718000006'`);
+    await query(`UPDATE pedidos SET estado = 'Completado', pago = 'Pagado' WHERE codigo = '#P-1718000007'`);
+    await query(`UPDATE pedidos SET estado = 'En Proceso', pago = 'Pagado' WHERE codigo = '#P-1718000008'`);
+    await query(`UPDATE pedidos SET estado = 'Pendiente', pago = 'Pendiente' WHERE codigo = '#P-1718000009'`);
+    await query(`UPDATE pedidos SET estado = 'Completado', pago = 'Pagado' WHERE codigo = '#P-1718000010'`);
     results.push('Seed data reseteado');
 
     /* ─── Seed data ─── */
