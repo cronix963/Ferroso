@@ -228,7 +228,7 @@ export default function ReportesView() {
 
         pdf.text('ACCIÓN', tableX + 3, y + 5.5);
         pdf.text('DETALLE', tableX + col1 + 3, y + 5.5);
-        pdf.text('TIEMPO', tableX + col1 + col2 + 3, y + 5.5);
+        pdf.text('HORA Y FECHA', tableX + col1 + col2 + 3, y + 5.5);
 
         y += rowHeight;
 
