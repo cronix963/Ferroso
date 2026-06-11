@@ -1,0 +1,27 @@
+-- FERROTECH — Seed data for cotizaciones (quotations)
+INSERT INTO cotizaciones (codigo, cliente_id, cliente, items, subtotal, impuesto, total, validez_dias, notas, estado, creado_por, created_at) VALUES
+('#C-1719000001', 1, 'Constructora Los Andes',
+ '[{"producto_id":1,"nombre":"Cemento Portland 50kg","cantidad":50,"precio":45.00},{"producto_id":2,"nombre":"Varilla 3/8 (12m)","cantidad":30,"precio":28.50},{"producto_id":3,"nombre":"Ladrillo Fiscal","cantidad":1000,"precio":2.80}]'::jsonb,
+ 5905.00, 295.25, 6200.25, 30, 'Cotización para obra de edificio en Zona Norte', 'Pendiente', 1, '2026-06-08 10:00:00'),
+('#C-1719000002', 2, 'Ingeniería Santa Cruz',
+ '[{"producto_id":5,"nombre":"Taladro Bosch 500W","cantidad":3,"precio":450.00},{"producto_id":4,"nombre":"Martillo Stanley 16oz","cantidad":10,"precio":65.00},{"producto_id":11,"nombre":"Cinta Métrica 5m","cantidad":15,"precio":25.00},{"producto_id":20,"nombre":"Disco de Corte 7","cantidad":25,"precio":22.00}]'::jsonb,
+ 2925.00, 146.25, 3071.25, 15, 'Herramientas para cuadrilla de 5 personas', 'Aprobada', 2, '2026-06-06 14:30:00'),
+('#C-1719000003', 3, 'Distribuidora Norte',
+ '[{"producto_id":8,"nombre":"Pintura Látex 20L","cantidad":10,"precio":220.00},{"producto_id":14,"nombre":"Impermeabilizante 20L","cantidad":5,"precio":185.00},{"producto_id":35,"nombre":"Brocha 4 Profesional","cantidad":20,"precio":18.00}]'::jsonb,
+ 3485.00, 174.25, 3659.25, 30, 'Presupuesto para pintar fábrica completa', 'Pendiente', 1, '2026-06-09 09:00:00'),
+('#C-1719000004', 1, 'Constructora Los Andes',
+ '[{"producto_id":6,"nombre":"Cable THW 2.5mm (100m)","cantidad":8,"precio":180.00},{"producto_id":16,"nombre":"Cable THW 4mm (100m)","cantidad":5,"precio":290.00},{"producto_id":12,"nombre":"Interruptor Simple","cantidad":40,"precio":8.50},{"producto_id":27,"nombre":"Foco LED 15W","cantidad":60,"precio":12.00}]'::jsonb,
+ 3950.00, 197.50, 4147.50, 20, 'Instalación eléctrica completa — 5 pisos', 'Revisión', 2, '2026-06-10 11:00:00'),
+('#C-1719000005', 2, 'Ingeniería Santa Cruz',
+ '[{"producto_id":7,"nombre":"Tubo PVC 2 (6m)","cantidad":30,"precio":32.00},{"producto_id":31,"nombre":"Pegamento PVC 250ml","cantidad":10,"precio":20.00},{"producto_id":32,"nombre":"Grifo Cocina Cromado","cantidad":8,"precio":95.00},{"producto_id":26,"nombre":"Bomba de Agua 1HP","cantidad":2,"precio":520.00}]'::jsonb,
+ 2960.00, 148.00, 3108.00, 30, 'Material sanitario para proyecto residencial', 'Pendiente', 1, '2026-06-10 15:00:00'),
+('#C-1719000006', 3, 'Distribuidora Norte',
+ '[{"producto_id":21,"nombre":"Sierra Circular Makita 7-1/4","cantidad":2,"precio":650.00},{"producto_id":22,"nombre":"Lijadora Orbital Bosch 250W","cantidad":2,"precio":380.00},{"producto_id":5,"nombre":"Taladro Bosch 500W","cantidad":4,"precio":450.00}]'::jsonb,
+ 3860.00, 193.00, 4053.00, 15, 'Equipamiento para taller de carpintería', 'Aprobada', 2, '2026-06-07 08:30:00'),
+('#C-1719000007', 1, 'Constructora Los Andes',
+ '[{"producto_id":10,"nombre":"Cemento CPN 50kg","cantidad":100,"precio":42.00},{"producto_id":3,"nombre":"Ladrillo Fiscal","cantidad":2000,"precio":2.80},{"producto_id":1,"nombre":"Cemento Portland 50kg","cantidad":80,"precio":45.00}]'::jsonb,
+ 13400.00, 670.00, 14070.00, 30, 'Materiales para obra gris — proyecto puente', 'Vencida', 1, '2026-05-20 10:00:00'),
+('#C-1719000008', 2, 'Ingeniería Santa Cruz',
+ '[{"producto_id":28,"nombre":"Cerradura Puerta Seguridad","cantidad":12,"precio":85.00},{"producto_id":29,"nombre":"Bisagra Premium Acero","cantidad":48,"precio":18.00},{"producto_id":30,"nombre":"Tornillo Para Madera 3 (kg)","cantidad":10,"precio":22.00}]'::jsonb,
+ 2104.00, 105.20, 2209.20, 30, 'Cotización para proyecto de 12 departamentos', 'Rechazada', 2, '2026-05-25 16:00:00')
+ON CONFLICT (codigo) DO NOTHING;

@@ -76,15 +76,15 @@ export default function CotizacionesView() {
             <tr className="border-b border-gray-100"><td colSpan={8} className="px-7 py-7 text-center text-gray-400 text-xs">No se encontraron cotizaciones</td></tr>
           ) : filtered.map(c => (
             <tr key={c.id} className="border-b border-gray-100 even:bg-gray-50 hover:bg-primary-100 transition-colors duration-100">
-              <td className="px-3 py-2 text-xs text-primary-light font-semibold font-mono">{c.id}</td>
+              <td className="px-3 py-2 text-xs text-primary-light font-semibold font-mono">{c.codigo}</td>
               <td className="px-3 py-2 text-xs text-gray-700 font-medium">{c.cliente}</td>
-              <td className="px-3 py-2 text-xs text-gray-700">{c.fecha}</td>
-              <td className="px-3 py-2 text-xs text-gray-700">{c.items}</td>
+              <td className="px-3 py-2 text-xs text-gray-700">{new Date(c.fecha).toLocaleDateString('es-BO', { day: '2-digit', month: 'short' })}</td>
+              <td className="px-3 py-2 text-xs text-gray-700">{c.itemsCount} uds</td>
               <td className="px-3 py-2 text-xs text-gray-700 font-semibold">{formatPrice(c.total)}</td>
-              <td className="px-3 py-2 text-xs text-gray-700">{c.validez}</td>
+              <td className="px-3 py-2 text-xs text-gray-700">{c.validez_dias} días</td>
               <td className="px-3 py-2 text-xs"><span className={`inline-flex px-2 py-0.5 rounded-full text-[0.65rem] font-semibold ${badge(c.estado)}`}>{c.estado}</span></td>
               <td className="px-3 py-2 text-xs text-center">
-                <button onClick={() => { setEditing(c); setFormData({ ...c }); setShowForm(true); }} className="text-primary hover:underline text-xs mr-3">Editar</button>
+                <button onClick={() => { setEditing(c); setFormData({ cliente: c.cliente, items: c.items, total: c.total, validez_dias: c.validez_dias, estado: c.estado }); setShowForm(true); }} className="text-primary hover:underline text-xs mr-3">Editar</button>
                 <button onClick={() => { if (confirm('¿Eliminar cotización?')) removeItem(c.id); }} className="text-danger hover:underline text-xs">Eliminar</button>
               </td>
             </tr>
@@ -108,8 +108,8 @@ export default function CotizacionesView() {
               <input type="number" step="0.01" min="0" value={formData.total ?? ''} onChange={e => setFormData({...formData, total: parseFloat(e.target.value) || 0})} className="w-full border rounded px-3 py-2 text-sm mt-1" />
             </label>
             <label className="block">
-              <span className="text-gray-600 text-sm">Vigencia</span>
-              <input type="text" value={formData.validez || ''} onChange={e => setFormData({...formData, validez: e.target.value})} className="w-full border rounded px-3 py-2 text-sm mt-1" placeholder="Ej: 15 días, 30 días" />
+              <span className="text-gray-600 text-sm">Vigencia (días)</span>
+              <input type="number" min="1" value={formData.validez_dias || 30} onChange={e => setFormData({...formData, validez_dias: parseInt(e.target.value) || 30})} className="w-full border rounded px-3 py-2 text-sm mt-1" />
             </label>
             <label className="block">
               <span className="text-gray-600 text-sm">Estado</span>

@@ -1,17 +1,38 @@
 import { create } from 'zustand';
 
-const searchableFields = ['cliente'];
+const searchableFields = ['codigo', 'cliente', 'email', 'estado'];
 
-const mapRecord = (record) => ({
-  id: record.id,
-  cliente: record.cliente || '',
-  fecha: record.fecha || '',
-  items: record.items ?? 0,
-  subtotal: record.subtotal ?? 0,
-  total: record.total ?? 0,
-  validez: record.validez || '',
-  estado: record.estado || 'Pendiente',
-});
+const mapRecord = (record) => {
+  // Parse JSONB items
+  let itemsList = [];
+  if (Array.isArray(record.items)) {
+    itemsList = record.items;
+  } else if (typeof record.items === 'string') {
+    try { itemsList = JSON.parse(record.items); } catch { itemsList = []; }
+  }
+
+  const itemsCount = itemsList.reduce((sum, i) => sum + (i.cantidad || i.qty || 1), 0);
+
+  return {
+    id: record.id,
+    codigo: record.codigo || `#C-${record.id}`,
+    cliente: record.cliente || '',
+    email: record.email || '',
+    telefono: record.telefono || '',
+    direccion: record.direccion || '',
+    items: itemsList,
+    itemsCount,
+    subtotal: parseFloat(record.subtotal) || 0,
+    impuesto: parseFloat(record.impuesto) || 0,
+    total: parseFloat(record.total) || 0,
+    validez_dias: record.validez_dias || 30,
+    estado: record.estado || 'Pendiente',
+    notas: record.notas || '',
+    creado_por: record.creado_por || null,
+    fecha: record.created_at || '',
+    created_at: record.created_at || '',
+  };
+};
 
 const API_ENDPOINT = '/api/cotizaciones';
 
