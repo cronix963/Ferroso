@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FiBarChart2,
   FiTrendingUp,
@@ -41,8 +41,6 @@ export default function ReportesView() {
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generatingPdf, setGeneratingPdf] = useState(false);
-
-  const reportRef = useRef(null);
 
   useEffect(() => {
     const load = async () => {
@@ -135,40 +133,185 @@ export default function ReportesView() {
   }, []);
 
   const handleGenerateReport = async () => {
-    if (!reportRef.current || generatingPdf) return;
+    if (generatingPdf) return;
 
     try {
       setGeneratingPdf(true);
 
-      const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
-
-      const canvas = await html2canvas(reportRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10;
-      const usableWidth = pdfWidth - margin * 2;
-      const imgHeight = (canvas.height * usableWidth) / canvas.width;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
-      let heightLeft = imgHeight;
-      let position = margin;
+      const margin = 15;
+      let y = 18;
 
-      pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight);
-      heightLeft -= pdfHeight - margin * 2;
+      const fecha = new Date().toLocaleDateString('es-BO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
 
-      while (heightLeft > 0) {
-        pdf.addPage();
-        position = heightLeft - imgHeight + margin;
-        pdf.addImage(imgData, 'PNG', margin, position, usableWidth, imgHeight);
-        heightLeft -= pdfHeight - margin * 2;
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(18);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('Reporte General - Ferrotech', margin, y);
+
+      y += 8;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.setTextColor(80, 90, 110);
+      pdf.text(`Fecha de generación: ${fecha}`, margin, y);
+
+      y += 6;
+      pdf.text('Módulo: Reportes y Dashboard', margin, y);
+
+      y += 10;
+
+      pdf.setDrawColor(60, 85, 120);
+      pdf.setLineWidth(0.5);
+      pdf.line(margin, y, pageWidth - margin, y);
+
+      y += 10;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text('Indicadores principales', margin, y);
+
+      y += 8;
+
+      const cardWidth = 85;
+      const cardHeight = 24;
+      const gap = 8;
+
+      stats.forEach((item, index) => {
+        const col = index % 2;
+        const row = Math.floor(index / 2);
+
+        const x = margin + col * (cardWidth + gap);
+        const cardY = y + row * (cardHeight + gap);
+
+        pdf.setDrawColor(220, 225, 235);
+        pdf.setFillColor(248, 250, 252);
+        pdf.roundedRect(x, cardY, cardWidth, cardHeight, 3, 3, 'FD');
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(70, 85, 105);
+        pdf.text(item.label, x + 5, cardY + 7);
+
+        pdf.setFontSize(14);
+        pdf.setTextColor(30, 41, 59);
+        pdf.text(String(item.value), x + 5, cardY + 15);
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(8);
+
+        if (item.change.startsWith('+')) {
+          pdf.setTextColor(22, 130, 70);
+        } else {
+          pdf.setTextColor(200, 50, 70);
+        }
+
+        pdf.text(`${item.change} vs mes anterior`, x + 5, cardY + 21);
+      });
+
+      y += Math.ceil(stats.length / 2) * (cardHeight + gap) + 5;
+
+      pdf.setTextColor(30, 41, 59);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(13);
+      pdf.text('Actividad reciente', margin, y);
+
+      y += 8;
+
+      const tableX = margin;
+      const col1 = 70;
+      const col2 = 75;
+      const col3 = 30;
+      const rowHeight = 8;
+      const tableWidth = col1 + col2 + col3;
+
+      const drawTableHeader = () => {
+        pdf.setFillColor(60, 85, 120);
+        pdf.rect(tableX, y, tableWidth, rowHeight, 'F');
+
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(8);
+        pdf.setTextColor(255, 255, 255);
+
+        pdf.text('ACCIÓN', tableX + 3, y + 5.5);
+        pdf.text('DETALLE', tableX + col1 + 3, y + 5.5);
+        pdf.text('TIEMPO', tableX + col1 + col2 + 3, y + 5.5);
+
+        y += rowHeight;
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(45, 55, 72);
+      };
+
+      drawTableHeader();
+
+      if (recentActivity.length === 0) {
+        pdf.setDrawColor(230, 230, 230);
+        pdf.rect(tableX, y, tableWidth, rowHeight);
+        pdf.text('Sin actividad reciente', tableX + 3, y + 5.5);
+        y += rowHeight;
+      } else {
+        recentActivity.forEach((item, index) => {
+          if (y > pageHeight - 25) {
+            pdf.addPage();
+            y = 20;
+            drawTableHeader();
+          }
+
+          if (index % 2 === 0) {
+            pdf.setFillColor(248, 250, 252);
+          } else {
+            pdf.setFillColor(255, 255, 255);
+          }
+
+          pdf.rect(tableX, y, tableWidth, rowHeight, 'F');
+
+          pdf.setDrawColor(230, 235, 240);
+          pdf.rect(tableX, y, tableWidth, rowHeight);
+
+          const actionText = pdf.splitTextToSize(item.action || '-', col1 - 6)[0];
+          const detailText = pdf.splitTextToSize(item.detail || '-', col2 - 6)[0];
+          const timeText = pdf.splitTextToSize(item.time || '-', col3 - 6)[0];
+
+          pdf.text(actionText, tableX + 3, y + 5.5);
+          pdf.text(detailText, tableX + col1 + 3, y + 5.5);
+          pdf.text(timeText, tableX + col1 + col2 + 3, y + 5.5);
+
+          y += rowHeight;
+        });
+      }
+
+      const totalPages = pdf.internal.getNumberOfPages();
+
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(120, 120, 120);
+
+        pdf.text(
+          'Ferrotech - Reporte generado automáticamente',
+          margin,
+          pageHeight - 10,
+        );
+
+        pdf.text(
+          `Página ${i} de ${totalPages}`,
+          pageWidth - margin - 25,
+          pageHeight - 10,
+        );
       }
 
       const fileDate = new Date().toISOString().slice(0, 10);
@@ -190,7 +333,7 @@ export default function ReportesView() {
   }
 
   return (
-    <div className="module-view" ref={reportRef}>
+    <div className="module-view">
       <div className="flex justify-between items-center flex-wrap gap-2">
         <h2 className="text-xl text-primary flex items-center gap-2">
           📊 Reportes y Dashboard{' '}
@@ -223,7 +366,6 @@ export default function ReportesView() {
         Indicadores clave y actividad reciente del sistema
       </p>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3 mb-5">
         {stats.map((s, i) => (
           <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
@@ -247,7 +389,6 @@ export default function ReportesView() {
         ))}
       </div>
 
-      {/* Activity Table */}
       <h4 className="text-xs text-primary mb-2.5">Actividad Reciente</h4>
 
       <table className="w-full border-collapse bg-white rounded-lg overflow-hidden border border-gray-200">
