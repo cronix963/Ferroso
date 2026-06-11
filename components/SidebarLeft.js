@@ -13,7 +13,6 @@ const modules = [
   { id:'envios',      icon: FiPackage,    label:'Envíos',       assign:'Issai' },
   { id:'cotizaciones',icon: FiFileText,   label:'Cotizaciones', assign:'Rolando' },
   { id:'pagos',       icon: FiCreditCard, label:'Pagos/Cobros', assign:'Rolando' },
-  { id:'creditos',    icon: FiStar,       label:'Créditos',     assign:'Rolando' },
 ];
 
 export default function SidebarLeft({ activeView, onNavigate }) {

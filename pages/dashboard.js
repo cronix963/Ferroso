@@ -20,7 +20,6 @@ import VentasView from '@/components/views/VentasView';
 import EnviosView from '@/components/views/EnviosView';
 import CotizacionesView from '@/components/views/CotizacionesView';
 import PagosCobrosView from '@/components/views/PagosCobrosView';
-import CreditosView from '@/components/views/CreditosView';
 
 const modules = [
   { id:'dashboard',   label:'📊 Dashboard' },
@@ -91,7 +90,6 @@ export default function Dashboard() {
       case 'envios':       return <EnviosView />;
       case 'cotizaciones': return <CotizacionesView />;
       case 'pagos':        return <PagosCobrosView />;
-      case 'creditos':     return <CreditosView />;
       default:
         return (
           <>
