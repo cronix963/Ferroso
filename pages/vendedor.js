@@ -334,11 +334,17 @@ export default function Vendedor() {
       p.cat.toLowerCase().includes(prodSearch.toLowerCase()),
   );
 
+  /* ── Helpers ── */
+  const pendingStatuses = ['Pendiente', 'En Proceso', 'Preparación'];
+  const completedStatuses = ['Completado', 'Despachado'];
+  const isPendingOrder = (o) => pendingStatuses.includes(o.estado);
+  const isCompletedOrder = (o) => completedStatuses.includes(o.estado);
+
   /* ── Stats ── */
   const stats = [
     { label: 'Clientes Activos', value: customers.filter((c) => c.estado === 'Activo').length, icon: FiUsers, color: '#2B6CB0' },
-    { label: 'Pedidos Pendientes', value: orders.filter((o) => o.estado === 'Pendiente').length, icon: FiClock, color: '#DD6B20' },
-    { label: 'Ventas Completadas', value: orders.filter((o) => o.estado === 'Completado').length, icon: FiCheckCircle, color: '#38A169' },
+    { label: 'Pedidos Pendientes', value: orders.filter(isPendingOrder).length, icon: FiClock, color: '#DD6B20' },
+    { label: 'Ventas Completadas', value: orders.filter(isCompletedOrder).length, icon: FiCheckCircle, color: '#38A169' },
     { label: 'Ventas Canceladas', value: orders.filter((o) => o.estado === 'Cancelado').length, icon: FiXCircle, color: '#E53E3E' },
     { label: 'Total Clientes', value: customers.length, icon: FiUsers, color: '#805AD5' },
     { label: 'Total Pedidos', value: orders.length, icon: FiPackage, color: '#2B6CB0' },
@@ -370,7 +376,7 @@ export default function Vendedor() {
             <div className="text-[0.6rem] opacity-60">Clientes</div>
           </div>
           <div className="text-right">
-            <div className="text-base font-bold">      {orders.filter((o) => o.estado === 'Pendiente').length}</div>
+            <div className="text-base font-bold">      {orders.filter(isPendingOrder).length}</div>
             <div className="text-[0.6rem] opacity-60">Pendientes</div>
           </div>
           <div className="text-right">
@@ -460,7 +466,7 @@ export default function Vendedor() {
               </thead>
               <tbody>
                 {orders
-                  .filter((o) => o.estado === 'Pendiente')
+                  .filter(isPendingOrder)
                   .map((o) => (
                     <tr key={o.id} className="border-b border-gray-100 transition-colors duration-100 even:bg-gray-50 hover:bg-primary-100">
                       <td className="px-3 py-2 text-xs text-primary-light font-semibold font-mono">{o.id}</td>
@@ -475,7 +481,7 @@ export default function Vendedor() {
                       </td>
                     </tr>
                   ))}
-                {orders.filter((o) => o.estado === 'Pendiente').length === 0 && (
+                {orders.filter(isPendingOrder).length === 0 && (
                   <tr className="border-b border-gray-100">
                     <td colSpan={6} className="px-7 py-7 text-center text-gray-400 text-xs">
                       No hay pedidos pendientes ✅
@@ -568,7 +574,7 @@ export default function Vendedor() {
               </thead>
               <tbody>
                 {orders
-                  .filter((o) => o.estado === 'Pendiente')
+                  .filter(isPendingOrder)
                   .filter((o) =>
                     searchO
                       ? o.id.toLowerCase().includes(searchO.toLowerCase()) ||
@@ -608,7 +614,7 @@ export default function Vendedor() {
                     </td>
                   </tr>
                 ))}
-                {orders.filter((o) => o.estado === 'Pendiente').length === 0 && (
+                {orders.filter(isPendingOrder).length === 0 && (
                   <tr className="border-b border-gray-100">
                     <td colSpan={8} className="px-7 py-7 text-center text-gray-400 text-xs">
                       No hay pedidos pendientes ✅
@@ -636,7 +642,7 @@ export default function Vendedor() {
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="text-[0.68rem] text-gray-500 font-medium mb-1">Ventas Totales</div>
                 <div className="text-2xl font-bold text-success">
-                  {orders.filter((o) => o.estado === 'Completado').length}
+                  {orders.filter(isCompletedOrder).length}
                 </div>
               </div>
               <div className="bg-white border border-gray-200 rounded-lg p-4">
@@ -646,7 +652,7 @@ export default function Vendedor() {
                   {orders
                     .reduce(
                       (s, o) =>
-                        s + (o.estado === 'Completado' ? o._totalRaw : 0),
+                        s + (isCompletedOrder(o) ? o._totalRaw : 0),
                       0,
                     )
                     .toLocaleString()}
@@ -656,14 +662,14 @@ export default function Vendedor() {
                 <div className="text-[0.68rem] text-gray-500 font-medium mb-1">Pedido Promedio</div>
                 <div className="text-2xl font-bold text-primary">
                   Bs
-                  {orders.filter((o) => o.estado === 'Completado').length > 0
+                  {orders.filter(isCompletedOrder).length > 0
                     ? (
                         orders.reduce(
                           (s, o) =>
                             s +
-                            (o.estado === 'Completado' ? o._totalRaw : 0),
+                            (isCompletedOrder(o) ? o._totalRaw : 0),
                           0,
-                        ) / orders.filter((o) => o.estado === 'Completado').length
+                        ) / orders.filter(isCompletedOrder).length
                       ).toFixed(2)
                     : '0'}
                 </div>
@@ -671,7 +677,7 @@ export default function Vendedor() {
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="text-[0.68rem] text-gray-500 font-medium mb-1">Productos Vendidos</div>
                 <div className="text-2xl font-bold text-primary">
-                  {orders.reduce((s, o) => s + (o.estado === 'Completado' ? o.items : 0), 0)}
+                  {orders.reduce((s, o) => s + (isCompletedOrder(o) ? o.items : 0), 0)}
                 </div>
               </div>
             </div>
@@ -690,7 +696,7 @@ export default function Vendedor() {
               </thead>
               <tbody>
                 {orders
-                  .filter((o) => o.estado === 'Completado')
+                  .filter(isCompletedOrder)
                   .map((o) => (
                     <tr key={o.id} className="border-b border-gray-100 transition-colors duration-100 even:bg-gray-50 hover:bg-primary-100">
                       <td className="px-3 py-2 text-xs text-primary-light font-semibold font-mono">{o.id}</td>
@@ -703,7 +709,7 @@ export default function Vendedor() {
                       </td>
                     </tr>
                   ))}
-                {orders.filter((o) => o.estado === 'Completado').length === 0 && (
+                {orders.filter(isCompletedOrder).length === 0 && (
                   <tr className="border-b border-gray-100">
                     <td colSpan={6} className="px-7 py-7 text-center text-gray-400 text-xs">
                       No hay ventas completadas
