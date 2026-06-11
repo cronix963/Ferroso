@@ -1,4 +1,4 @@
-import { FiGrid, FiUsers, FiPackage, FiBriefcase, FiShoppingCart, FiBox, FiTruck, FiDollarSign, FiFileText, FiCreditCard, FiBarChart2 } from 'react-icons/fi';
+import { FiGrid, FiUsers, FiPackage, FiBriefcase, FiShoppingCart, FiBox, FiTruck, FiDollarSign, FiFileText, FiCreditCard, FiBarChart2, FiStar } from 'react-icons/fi';
 
 const modules = [
   { id:'dashboard',   icon: FiGrid,      label:'Dashboard',    assign:'' },
@@ -13,6 +13,7 @@ const modules = [
   { id:'envios',      icon: FiPackage,    label:'Envíos',       assign:'Issai' },
   { id:'cotizaciones',icon: FiFileText,   label:'Cotizaciones', assign:'Rolando' },
   { id:'pagos',       icon: FiCreditCard, label:'Pagos/Cobros', assign:'Rolando' },
+  { id:'creditos',    icon: FiStar,       label:'Créditos',     assign:'Rolando' },
 ];
 
 export default function SidebarLeft({ activeView, onNavigate }) {

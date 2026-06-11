@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { FiSearch, FiPlus } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiPrinter } from 'react-icons/fi';
+import { useRouter } from 'next/router';
 import { useCotizacionesStore } from '../../stores/cotizaciones.store';
 import LoadingSpinner from '../LoadingSpinner';
 import ErrorBanner from '../ErrorBanner';
@@ -13,6 +14,7 @@ const badge = (s) => ({
 }[s]||'bg-[#FEFCBF] text-[#744210]');
 
 export default function CotizacionesView() {
+  const router = useRouter();
   const { items, loading, error, fetchAll, addItem, updateItem, removeItem, search } = useCotizacionesStore();
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -68,7 +70,7 @@ export default function CotizacionesView() {
             <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">TOTAL</th>
             <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">VALIDEZ</th>
             <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-left">ESTADO</th>
-            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-center w-24">ACCIONES</th>
+            <th className="text-white font-semibold text-[0.68rem] uppercase tracking-wider px-3 py-2.5 text-center w-32">ACCIONES</th>
           </tr>
         </thead>
         <tbody>
@@ -84,7 +86,24 @@ export default function CotizacionesView() {
               <td className="px-3 py-2 text-xs text-gray-700">{c.validez_dias} días</td>
               <td className="px-3 py-2 text-xs"><span className={`inline-flex px-2 py-0.5 rounded-full text-[0.65rem] font-semibold ${badge(c.estado)}`}>{c.estado}</span></td>
               <td className="px-3 py-2 text-xs text-center">
-                <button onClick={() => { setEditing(c); setFormData({ cliente: c.cliente, items: c.items, total: c.total, validez_dias: c.validez_dias, estado: c.estado }); setShowForm(true); }} className="text-primary hover:underline text-xs mr-3">Editar</button>
+                <button onClick={() => {
+                  const q = new URLSearchParams({
+                    codigo: c.codigo,
+                    cliente: c.cliente,
+                    cliente_id: c.cliente_id || '',
+                    items: JSON.stringify(c.items || []),
+                    subtotal: c.subtotal || 0,
+                    impuesto: c.impuesto || 0,
+                    total: c.total || 0,
+                    validez_dias: c.validez_dias || 30,
+                    estado: c.estado || 'Pendiente',
+                    notas: c.notas || '',
+                    created_at: c.fecha || '',
+                    print: 'true',
+                  }).toString();
+                  window.open(`/cotizacion-print?${q}`, '_blank');
+                }} className="text-accent hover:underline text-xs mr-2" title="Imprimir"><FiPrinter size={12} className="inline" /></button>
+                <button onClick={() => { setEditing(c); setFormData({ cliente: c.cliente, items: c.items, total: c.total, validez_dias: c.validez_dias, estado: c.estado }); setShowForm(true); }} className="text-primary hover:underline text-xs mr-2">Editar</button>
                 <button onClick={() => { if (confirm('¿Eliminar cotización?')) removeItem(c.id); }} className="text-danger hover:underline text-xs">Eliminar</button>
               </td>
             </tr>
